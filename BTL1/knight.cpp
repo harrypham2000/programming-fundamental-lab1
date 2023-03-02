@@ -21,6 +21,7 @@
 #define MeetMerlin 18
 #define MeetAsclepius 19
 #define MeetBowser 99
+#define MaxHP 172
 
 float baseDmg[]={0.0,1.0,1.5,4.5,7.5,9.5};
 
@@ -46,6 +47,9 @@ void getInput(string input_string,int& HP, int& level, int& remedy, int& maidenk
     while(event_ss >> events[event_count]){
         event_count++;
     }
+}
+int countEffect(int effectCount, int eventCount) {
+
 }
 void battleEngage(int & HP, int & level, int event,int countEvent) {
         int levelO=0;
@@ -82,7 +86,7 @@ int witchShaman(int & HP, int & level, int event, int countEvent){
             }
         }
     }
-}
+
 int battleVajsh(int & HP, int & level, int event, int countEvent){
     int levelO=0;
     int b=countEvent%10;
@@ -99,6 +103,21 @@ int battleVajsh(int & HP, int & level, int event, int countEvent){
         return -1;
     }
 }
+void pickMushMario(int & HP, int & level, int & phoenixdown ,int event, int countEvent){
+    int n1=((level+phoenixdown)%5+1)*3, s1=0, countn1=0;
+    for(int i=99;i>=10;i-=2){
+        s1+=i;
+        countn1++;
+        if(countn1==n1) break;
+    }
+    HP=min(HP+(s1%100),MaxHP);
+
+}
+void pickMushFib(int & HP, int & level, int event, int countEvent){
+
+}
+void pickMushGhost(int & HP, int & level, int event, int countEvent){
+
 }
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue) {
     ifstream input_file(file_input);
@@ -109,7 +128,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     }
     string input_string;
     int events[100]={0,};
-    int MaxHP=min(HP,172);
     getline(input_file,input_string);
     getInput(input_string,HP, level,remedy,maidenkiss,phoenixdown,rescue, events);
     for (int i=1;i<(sizeof(events)/sizeof(*events))&&HP>0&&level<=10&&rescue==0;i++) {
@@ -132,6 +150,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
                 battleVajsh(HP,level,event,countEvent);
                 break;
             case PickUpMushMario:
+
                 break;
             case PickUpMushFib:
                 break;
