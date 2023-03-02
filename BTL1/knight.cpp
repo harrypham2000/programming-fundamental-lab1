@@ -47,10 +47,10 @@ void getInput(string input_string,int& HP, int& level, int& remedy, int& maidenk
         event_count++;
     }
 }
-void battleEngage(int & HP, int & level, int event) {
+void battleEngage(int & HP, int & level, int event,int countEvent) {
         int levelO=0;
-        int b=event%10;
-        levelO=event>6?(b>5?b:5):b;
+        int b=countEvent%10;
+        levelO=countEvent>6?(b>5?b:5):b;
         if(level>levelO){
             level=min(10,level++);
         }
@@ -58,15 +58,14 @@ void battleEngage(int & HP, int & level, int event) {
             level=level;
         }
         else if(level<levelO){
-            float dmg=baseDmg[event]*levelO*10.0;
+            float dmg=baseDmg[countEvent]*levelO*10.0;
             HP=int(HP-dmg);
         }
     }
-}
-int witchShaman(int & HP, int & level, int event){
+int witchShaman(int & HP, int & level, int event, int countEvent){
         int levelO=0;
-        int b=event%10;
-        levelO=event>6?(b>5?b:5):b;
+        int b=countEvent%10;
+        levelO=countEvent>6?(b>5?b:5):b;
         if(level>levelO){
             level=min(10,level+=2);
             return 1;
@@ -84,10 +83,10 @@ int witchShaman(int & HP, int & level, int event){
         }
     }
 }
-int battleVajsh(int & HP, int & level, int event){
+int battleVajsh(int & HP, int & level, int event, int countEvent){
     int levelO=0;
-    int b=event%10;
-    levelO=event>6?(b>5?b:5):b;
+    int b=countEvent%10;
+    levelO=countEvent>6?(b>5?b:5):b;
     if(level>levelO){
         level=min(10,level+=2);
         return 1;
@@ -109,12 +108,36 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         return;
     }
     string input_string;
-    int events[100]={0};
+    int events[100]={0,};
     int MaxHP=min(HP,172);
     getline(input_file,input_string);
-    getInput(input_string,HP, level,remedy,maidenkiss,phoenixdown,rescue,events);
+    getInput(input_string,HP, level,remedy,maidenkiss,phoenixdown,rescue, events);
     for (int i=1;i<(sizeof(events)/sizeof(*events))&&HP>0&&level<=10&&rescue==0;i++) {
-        int event=events[i];
+        int event=events[i],countEvent=1;
+        switch (event) {
+            case BowserSurrendered:
+                rescue=0;
+                break;
+            case MeetMadBear:
+            case MeetBandit:
+            case MeetLordLupin:
+            case MeetElf:
+            case MeetTroll:
+                battleEngage(HP,level,event,countEvent);
+                break;
+            case MeetShaman:
+                witchShaman(HP,level,event,countEvent);
+                break;
+            case MeetSirenVajsh:
+                battleVajsh(HP,level,event,countEvent);
+                break;
+            case PickUpMushMario:
+                break;
+            case PickUpMushFib:
+                break;
+            case PickUpMushGhost:
+                break;
+        }
 
 //        if (event>=MeetMadBear&&event<=MeetTroll){
 //            battleEngage(HP, level, event);
