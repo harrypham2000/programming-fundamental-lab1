@@ -34,7 +34,7 @@ void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int
         << ", rescue=" << rescue << endl;
 }
 
-void getInput(string input_string,int& HP, int& level, int& remedy, int& maidenkiss, int& phoenixdown, int& rescue, int events[100]){
+void getInput(string input_string,int& HP, int& level, int& remedy, int& maidenkiss, int& phoenixdown, int& rescue, int *events){
     stringstream ss(input_string);
     if(ss.peek() == '\n') ss.ignore();
     string line;
