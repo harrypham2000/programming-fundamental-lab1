@@ -10,6 +10,9 @@ int battleEngage(int&HP,int&maxHP, int &level,int&phoenixdown,int & rescue ,int 
 int battleShaman(int&HP,int&maxHP, int &level,int&phoenixdown,int&remedy,int & rescue ,int &event, int&count,int&countTiny);
 int battleSirenVajsh(int&HP,int&maxHP, int &level,int&maidenkiss,int&remedy,int & rescue ,int &event, int&count,int&countFrog);
 int mushMario(int&HP, int&maxHP, int&level,int&phoenixdown);
+int calcFibo(int n);
+int mushFibo(int&HP);
+int mushGhost();
 int comeToKoopa();
 
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue);
