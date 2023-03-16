@@ -19,7 +19,7 @@
 #define meetAsclepius 19
 #define meetBowser 99
 
-int events[50]={0,};
+
 float baseDmg[]={0.0,1.0,1.5,4.5,7.5,9.5};
 void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int rescue) {
     cout << "HP=" << HP
@@ -32,19 +32,29 @@ void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue) {
     ifstream inputFile(file_input);
     if(!checkOpenFile(file_input)){
-        cerr << "File cannot be openned!";
+        cerr << "File error" << endl;
         return;
     }
+    int events[100], numEvents=0;
     string inputString;
     getline(inputFile,inputString);
-    string mushGhostLine,asclepiusLine, merlinLine;
-    getInput(inputString,HP,level, remedy, maidenkiss, phoenixdown, rescue, events);
-    int maxHP=min(HP,172), countTiny,countFrog;
+    getInput(inputString, HP, level, remedy, maidenkiss, phoenixdown, rescue, events);
+    string file_mush_ghost, file_asclepius_pack, file_merlin_pack;
+    if (!getline(inputFile, file_mush_ghost, ',') || !getline(inputFile, file_asclepius_pack, ',') || !getline(inputFile, file_merlin_pack)) {
+        cerr << "Error" << endl;
+        return;
+    }
+    int maxHP=min(HP,172), countTiny=0,countFrog=0,eventSize=sizeof(events)/sizeof(events[0]),eventIndex=0,position=1;
     while(HP>0&&level<=10&&rescue==0){
-        for(int i=1; i<=sizeof(events)/sizeof(events[0]);i++){
-            int event=events[i], count=1;
-            countTiny--;
-            countFrog--;
+            int event=events[eventIndex];
+            eventIndex++;
+            //Check effect files
+            bool hasMushGhost = (event == 13 && !file_mush_ghost.empty());
+            bool hasAsclepiusPack = (event == 19 && !file_asclepius_pack.empty());
+            bool hasMerlinPack = (event == 18 && !file_merlin_pack.empty());
+            //Check remain effects
+            countTiny=max(0,countTiny-1);
+            countFrog=max(0,countFrog-1);
             int getLevel=min(level,10);
             switch (event) {
                 case bowserSurrender:
@@ -55,7 +65,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
                 case meetLordLupin:
                 case meetElf:
                 case meetTroll:
-                    battleEngage(HP,maxHP, level,phoenixdown,rescue, event, count);
+                    battleEngage(HP,maxHP, level,phoenixdown,rescue, event,position);
                     break;
                 case meetShaman:
                     if(countTiny>0||countFrog>0){
@@ -63,11 +73,11 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
                     }
                     else if(countTiny==0){
                         HP=min(HP*5,maxHP);
-                        battleShaman(HP,maxHP, level,phoenixdown,remedy,rescue ,event, count, countTiny);
+                        battleShaman(HP,maxHP, level,phoenixdown,remedy,rescue ,event, position, countTiny);
                         break;
                     }
                     else{
-                    battleShaman(HP,maxHP, level,phoenixdown,remedy,rescue ,event, count, countTiny);
+                    battleShaman(HP,maxHP, level,phoenixdown,remedy,rescue ,event, position, countTiny);
                     break;
                     }
                 case meetSirenVajsh:
@@ -76,11 +86,11 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
                     }
                     else if(countFrog==0){
                         level=getLevel;
-                        battleSirenVajsh(HP, maxHP, level, maidenkiss,remedy, rescue, event, count, countFrog);
+                        battleSirenVajsh(HP, maxHP, level, maidenkiss,remedy, rescue, event, position, countFrog);
                         break;
                     }
                     else {
-                        battleSirenVajsh(HP, maxHP, level, maidenkiss,remedy, rescue, event, count, countFrog);
+                        battleSirenVajsh(HP, maxHP, level, maidenkiss,remedy, rescue, event, position, countFrog);
                         break;
                     }
                 case pickMushMario:
@@ -96,26 +106,28 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
                     comeToKoopa();
                     break;
             }
-        }
+              position++;
     }
     cout << "Function isn't implemented" << endl;
 }
-void getInput(string input_string, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue, int * events){
+void getInput(string input_string, int &HP, int &level, int &remedy, int &maidenkiss, int &phoenixdown, int &rescue, int *events,string & file_mush_ghost, string&file_asclepius_pack, string&file_merlin_pack) {
     stringstream ss(input_string);
     string line;
     int eventCount=1;
     while(getline(ss,line)){
-        stringstream lineSS(line);
+        istringstream lineSS(line);
         lineSS >> HP >> level >> remedy >> maidenkiss >> phoenixdown >> rescue;
-        stringstream eventSS(line);
+        istringstream eventSS(line);
         while(eventSS.peek()!=EOF){
             eventSS >> events[eventCount];
             eventCount++;
         }
     }
     getline(ss,line);
-    stringstream mushSS(line);
-
+    istringstream fileSS(line);
+    getline(ss,file_mush_ghost,',');
+    getline(ss, file_asclepius_pack,',');
+    getline(ss, file_merlin_pack);
 }
 bool checkOpenFile(string& file_input){
     ifstream inputFile(file_input);
@@ -124,10 +136,10 @@ bool checkOpenFile(string& file_input){
     }
     return true;
 }
-int battleEngage(int & HP,int&maxHP, int & level,int&phoenixdown,int & rescue, int & event, int & count){
+int battleEngage(int & HP,int&maxHP, int & level,int&phoenixdown,int & rescue, int & event, int & position){
     int levelO=0;
-    float b=count%10;
-    levelO=count>6?(b>5?b:5):b;
+    float b=position%10;
+    levelO=position>6?(b>5?b:5):b;
     if(level>levelO){
         level++;
         level=min(level,10);
@@ -150,10 +162,10 @@ int battleEngage(int & HP,int&maxHP, int & level,int&phoenixdown,int & rescue, i
         }
     }
 }
-int battleShaman(int &HP,int&maxHP, int &level,int&phoenixdown,int & remedy,int & rescue ,int &events, int&count, int&countTiny){
+int battleShaman(int &HP,int&maxHP, int &level,int&phoenixdown,int & remedy,int & rescue ,int &events, int&position, int&countTiny){
     int levelO=0;
-    float b=count%10;
-    levelO=count>6?(b>5?b:5):b;
+    float b=position%10;
+    levelO=position>6?(b>5?b:5):b;
     if(level>levelO){
         level+=2;
         level=min(level,10);
@@ -200,10 +212,10 @@ int battleShaman(int &HP,int&maxHP, int &level,int&phoenixdown,int & remedy,int 
         }
     }
 }
-int battleSirenVajsh(int&HP,int&maxHP, int &level,int&maidenkiss,int&remedy,int & rescue ,int &event, int&count,int&countFrog){
+int battleSirenVajsh(int&HP,int&maxHP, int &level,int&maidenkiss,int&remedy,int & rescue ,int &event, int&position,int&countFrog){
     int levelO=0;
-    float b=count%10;
-    levelO=count>6?(b>5?b:5):b;
+    float b=position%10;
+    levelO=position>6?(b>5?b:5):b;
     if(level>levelO){
         level++;
         level=min(level,10);
@@ -269,7 +281,7 @@ int mushFibo(int&HP){
         return HP;
     }
 }
-int mushGhost(){
+int mushGhost(int &HP){
     switch(){
         case 1:
 
